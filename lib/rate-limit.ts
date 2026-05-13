@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
+import { env } from '@/lib/env';
 import type { Feature, UsageSummary } from '@/types';
 
-const DAILY_LIMIT = parseInt(process.env.DAILY_REQUEST_LIMIT ?? '50', 10);
+const DAILY_LIMIT = env.DAILY_REQUEST_LIMIT();
 
 /**
  * Check if the user has remaining quota for today.

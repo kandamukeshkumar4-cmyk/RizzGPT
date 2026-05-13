@@ -7,6 +7,7 @@
  * returns undefined — the key never reaches the browser.
  */
 import OpenAI from 'openai';
+import { env } from '@/lib/env';
 import type { NIMModel } from '@/types';
 
 /**
@@ -14,9 +15,11 @@ import type { NIMModel } from '@/types';
  * All models on build.nvidia.com are accessible through this endpoint.
  * Key is validated at runtime (first API call), not at build time,
  * so Next.js static analysis does not throw during `next build`.
+ * API key is read via env() which always .trim()s the value, guarding
+ * against trailing newlines from shell-piped `vercel env add` commands.
  */
 export const nim = new OpenAI({
-  apiKey:  (process.env.NVIDIA_API_KEY ?? 'key-not-set').trim(),
+  apiKey:  env.NVIDIA_API_KEY(),
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
