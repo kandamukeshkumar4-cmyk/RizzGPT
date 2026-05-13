@@ -5,13 +5,52 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Convert a File to base64 string */
+/** Convert a File to base64 string (no compression) */
 export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload  = () => resolve((reader.result as string).split(',')[1]);
     reader.onerror = reject;
+  });
+}
+
+/**
+ * Convert a File to a compressed base64 JPEG string.
+ * Resizes to maxDim × maxDim (preserving aspect ratio) and re-encodes as JPEG.
+ * Typical result: < 200 KB even for 12 MP photos — safe for JSON request bodies.
+ */
+export function fileToCompressedBase64(
+  file: File,
+  maxDim = 1024,
+  quality = 0.82,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      // Calculate target dimensions
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width >= height) {
+          height = Math.round((height / width)  * maxDim);
+          width  = maxDim;
+        } else {
+          width  = Math.round((width  / height) * maxDim);
+          height = maxDim;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      resolve(dataUrl.split(',')[1]); // return only the base64 part
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
   });
 }
 

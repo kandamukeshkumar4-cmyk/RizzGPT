@@ -36,6 +36,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Maximum 10 photos per session' }, { status: 400 });
     }
 
+    // Guard: each base64 image should be ≤ 2 MB after compression (~1.5 MB JPEG)
+    const tooBig = photos.some(b64 => b64.length > 2_800_000);
+    if (tooBig) {
+      return NextResponse.json(
+        { error: 'One or more photos is too large. Please use images under 2 MB.' },
+        { status: 400 }
+      );
+    }
+
     const validStyles: PhotoStyle[] = ['professional', 'casual', 'adventurous', 'artistic'];
     const photoStyle: PhotoStyle = validStyles.includes(style) ? style : 'casual';
 
@@ -100,6 +109,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('[/api/ai-photos]', err);
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: 'Something went wrong', detail }, { status: 500 });
   }
 }

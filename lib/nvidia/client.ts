@@ -16,7 +16,7 @@ import type { NIMModel } from '@/types';
  * so Next.js static analysis does not throw during `next build`.
  */
 export const nim = new OpenAI({
-  apiKey:  process.env.NVIDIA_API_KEY ?? 'key-not-set',
+  apiKey:  (process.env.NVIDIA_API_KEY ?? 'key-not-set').trim(),
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
@@ -94,9 +94,9 @@ export const DEFAULT_MODELS = {
 export const FALLBACK_MODELS: Record<string, string> = {
   'qwen/qwen3.5-397b-a17b':                  'meta/llama-3.1-70b-instruct',
   'nvidia/nemotron-nano-12b-v2-vl':          'meta/llama-4-maverick-17b-128e-instruct',
-  'meta/llama-4-maverick-17b-128e-instruct': 'meta/llama-3.3-70b-instruct',
+  'meta/llama-4-maverick-17b-128e-instruct': 'nvidia/llama-3.3-nemotron-super-49b-v1',
   'nvidia/llama-3.3-nemotron-super-49b-v1':  'meta/llama-3.1-70b-instruct',
-  'meta/llama-3.1-70b-instruct':             'meta/llama-3.3-70b-instruct',
+  'meta/llama-3.1-70b-instruct':             'meta/llama-3.1-8b-instruct',
 };
 
 // ─── Router model ─────────────────────────────────────────────────────────────

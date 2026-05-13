@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone }           from 'react-dropzone';
 import { Camera, Upload, Loader2, Zap, X, CheckCircle2, AlertCircle } from 'lucide-react';
-import { fileToBase64 } from '@/lib/utils';
+import { fileToCompressedBase64 } from '@/lib/utils';
 import type { PhotoStyle } from '@/types';
 
 const STYLES: { value: PhotoStyle; label: string; emoji: string; desc: string }[] = [
@@ -63,7 +63,8 @@ export default function AIPhotosPage() {
     setResult(null);
 
     try {
-      const photos = await Promise.all(files.map(fileToBase64));
+      // Resize + compress to ≤ 1024 px / 82 % JPEG before sending
+      const photos = await Promise.all(files.map(f => fileToCompressedBase64(f, 1024, 0.82)));
 
       const res  = await fetch('/api/ai-photos', {
         method:  'POST',
@@ -72,7 +73,11 @@ export default function AIPhotosPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Something went wrong'); return; }
+      if (!res.ok) {
+        const msg = data.detail ? `${data.error}: ${data.detail}` : (data.error ?? 'Something went wrong');
+        setError(msg);
+        return;
+      }
       setResult(data as AnalysisResult);
     } catch {
       setError('Network error — please try again');

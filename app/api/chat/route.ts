@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('[/api/chat]', err);
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: 'Something went wrong', detail }, { status: 500 });
   }
 }

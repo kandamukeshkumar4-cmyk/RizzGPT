@@ -8,7 +8,7 @@ import {
   Star, Upload, Loader2, Zap, X, AlertTriangle,
   CheckCircle2, TrendingUp, Camera, FileText
 } from 'lucide-react';
-import { fileToBase64, scorePathColor } from '@/lib/utils';
+import { fileToCompressedBase64, scorePathColor } from '@/lib/utils';
 import type { ProfileReviewResponse } from '@/types';
 
 const PLATFORMS = ['Tinder','Bumble','Hinge','Coffee Meets Bagel','OkCupid','Other'];
@@ -51,7 +51,8 @@ export default function ProfileReviewPage() {
     setResult(null);
 
     try {
-      const imageBase64s = await Promise.all(files.map(fileToBase64));
+      // Resize + compress to ≤ 1024 px / 82 % JPEG before sending
+      const imageBase64s = await Promise.all(files.map(f => fileToCompressedBase64(f, 1024, 0.82)));
 
       const res  = await fetch('/api/profile-review', {
         method:  'POST',
@@ -64,7 +65,11 @@ export default function ProfileReviewPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Something went wrong'); return; }
+      if (!res.ok) {
+        const msg = data.detail ? `${data.error}: ${data.detail}` : (data.error ?? 'Something went wrong');
+        setError(msg);
+        return;
+      }
       setResult(data as ProfileReviewResponse);
     } catch {
       setError('Network error — please try again');
