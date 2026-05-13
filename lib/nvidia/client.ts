@@ -9,16 +9,14 @@
 import OpenAI from 'openai';
 import type { NIMModel } from '@/types';
 
-if (!process.env.NVIDIA_API_KEY) {
-  throw new Error('NVIDIA_API_KEY is not set. Add it to .env.local');
-}
-
 /**
  * OpenAI-compatible client pointed at NVIDIA NIM.
  * All models on build.nvidia.com are accessible through this endpoint.
+ * Key is validated at runtime (first API call), not at build time,
+ * so Next.js static analysis does not throw during `next build`.
  */
 export const nim = new OpenAI({
-  apiKey: process.env.NVIDIA_API_KEY,
+  apiKey:  process.env.NVIDIA_API_KEY ?? 'key-not-set',
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
