@@ -27,7 +27,9 @@ export async function nimCall(
   const primary = params.model as string;
 
   try {
-    const completion = await nim.chat.completions.create(params);
+    const completion = await nim.chat.completions.create({
+      ...params, stream: false,
+    }) as OpenAI.Chat.ChatCompletion;
     return { completion, modelUsed: primary };
   } catch (err) {
     if (!is410(err)) throw err; // re-throw non-410 errors
@@ -36,7 +38,9 @@ export async function nimCall(
     if (!fallback) throw err;
 
     console.warn(`[NIM] ${primary} → 410, falling back to ${fallback}`);
-    const completion = await nim.chat.completions.create({ ...params, model: fallback });
+    const completion = await nim.chat.completions.create({
+      ...params, model: fallback, stream: false,
+    }) as OpenAI.Chat.ChatCompletion;
     return { completion, modelUsed: fallback };
   }
 }
