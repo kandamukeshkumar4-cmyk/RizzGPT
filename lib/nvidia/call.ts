@@ -13,9 +13,10 @@ import { nim, FALLBACK_MODELS, ROUTER_MODEL } from './client';
 
 type CreateParams = Parameters<typeof nim.chat.completions.create>[0];
 
-// Per-request ceiling so a dead/slow model fails over fast instead of
-// hanging until the serverless function times out (504).
-const REQUEST_TIMEOUT_MS = 20_000;
+// Per-request ceiling so a truly-hung model aborts before the serverless
+// function's own limit (504), while still allowing slow-but-working large
+// generations (e.g. 6 bios ≈ 30s) to finish. Sits just under maxDuration.
+const REQUEST_TIMEOUT_MS = 40_000;
 
 // A model that's gone (410), missing (404), timing out, or 5xx-ing is worth
 // retrying on the fallback model. Auth (401/403) and bad-request (400) are not.

@@ -12,7 +12,7 @@ import { checkAndIncrementUsage, RateLimitError } from '@/lib/rate-limit';
 import type { ProfileWriterRequest, ProfileWriterResponse } from '@/types';
 
 export const runtime    = 'nodejs';
-export const maxDuration = 45;
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         { role: 'user',   content: profileWriterUserPrompt(answers)    },
       ],
       temperature: 0.9,   // Higher temp for creative variety
-      max_tokens:  2000,
+      max_tokens:  1200,  // 6 short bios fit easily; keeps latency well under the function limit
     });
     if (modelUsed !== model) console.info(`[profile-writer] fell back: ${model} → ${modelUsed}`);
 
