@@ -70,3 +70,140 @@ body {
   outline: 2px solid #a855f7;
   outline-offset: 2px;
 }
+
+/* ── Landing animations ─────────────────────────────────────────────── */
+
+/* Scroll reveal — toggled by IntersectionObserver via .is-visible */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Floating elements (phone mockups, orbs) */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-16px); }
+}
+.animate-float       { animation: float 6s ease-in-out infinite; }
+.animate-float-slow  { animation: float 9s ease-in-out infinite; }
+
+/* Drifting background blobs */
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, -30px) scale(1.1); }
+  66%      { transform: translate(-30px, 30px) scale(0.95); }
+}
+.animate-blob { animation: blob 18s ease-in-out infinite; }
+
+/* Animated gradient text shimmer */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.gradient-text-animated {
+  background: linear-gradient(135deg, #c084fc, #d946ef, #f43f5e, #c084fc);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* Logo marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 22s linear infinite; }
+
+/* Soft pulse for badges */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); }
+  50%      { box-shadow: 0 0 0 12px rgba(168, 85, 247, 0); }
+}
+.animate-pulse-glow { animation: pulse-glow 2.8s ease-in-out infinite; }
+
+/* Step 1 — screenshot capture flash */
+@keyframes shot-flash {
+  0%, 70%, 100% { opacity: 0; }
+  74%, 82%      { opacity: 0.85; }
+}
+.animate-shot-flash { animation: shot-flash 3.4s ease-in-out infinite; }
+
+/* a captured thumbnail popping into the counter */
+@keyframes thumb-fly {
+  0%, 72%   { opacity: 0; transform: translateY(40px) scale(0.6); }
+  82%       { opacity: 1; transform: translateY(0) scale(1); }
+  96%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-thumb-fly { animation: thumb-fly 3.4s ease-out infinite; }
+
+/* Step 2 — thumbnails dropping into the upload box, staggered */
+@keyframes drop-in {
+  0%, 100% { opacity: 0; transform: translateY(-14px) scale(0.8); }
+  20%, 90% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-drop-in { animation: drop-in 4s ease-in-out infinite; }
+
+/* Step 2 — analyzing scan line */
+@keyframes scan {
+  0%   { top: 0; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-scan { animation: scan 2.4s ease-in-out infinite; }
+
+/* Step 3 — reply cards typing in, staggered via delay */
+@keyframes reply-in {
+  0%, 100% { opacity: 0; transform: translateY(12px); }
+  15%, 92% { opacity: 1; transform: translateY(0); }
+}
+.animate-reply-in { animation: reply-in 5s ease-in-out infinite; }
+
+/* Step 3 — copy → check toggle */
+@keyframes copied {
+  0%, 60%, 100% { opacity: 0; }
+  70%, 92%      { opacity: 1; }
+}
+.animate-copied { animation: copied 5s ease-in-out infinite; }
+
+/* Photo-coach face-detection bracket pulse */
+@keyframes detect {
+  0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(0.92); }
+  50%      { opacity: 1;   transform: translateX(-50%) scale(1.04); }
+}
+.animate-detect { animation: detect 2.4s ease-in-out infinite; }
+
+/* Profile-review score ring sweeping in */
+@keyframes score-ring {
+  from { stroke-dashoffset: 97.4; }
+  to   { stroke-dashoffset: 22; }
+}
+.animate-score-ring { animation: score-ring 1.4s ease-out forwards; }
+
+/* One-shot pop-in (used by Try-it-out generated cards) */
+@keyframes pop-in {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop-in { opacity: 0; animation: pop-in 0.4s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .animate-float, .animate-float-slow, .animate-blob,
+  .gradient-text-animated, .animate-marquee, .animate-pulse-glow,
+  .animate-shot-flash, .animate-thumb-fly, .animate-drop-in,
+  .animate-scan, .animate-reply-in, .animate-copied, .animate-pop-in,
+  .animate-score-ring, .animate-detect {
+    animation: none;
+  }
+  .animate-pop-in { opacity: 1; }
+}
