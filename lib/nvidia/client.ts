@@ -36,9 +36,9 @@ export const nim = new OpenAI({
 
 export const NIM_MODELS: NIMModel[] = [
   {
-    id: 'qwen/qwen3.5-397b-a17b',
-    name: 'Qwen 3.5 397B (Alibaba)',
-    description: 'Alibaba • 400B MoE • Best text quality on NIM • Chat, writing, review',
+    id: 'meta/llama-3.3-70b-instruct',
+    name: 'Llama 3.3 70B (Meta)',
+    description: 'Meta • 70B • Best general text quality on NIM • Chat, writing, review',
     bestFor: ['chat', 'profile_writer', 'profile_review'],
     contextWindow: 131072,
     supportsVision: false,
@@ -87,15 +87,15 @@ export const NIM_MODELS: NIMModel[] = [
 
 // ─── Default models per feature ───────────────────────────────────────────────
 export const DEFAULT_MODELS = {
-  chat:           'qwen/qwen3.5-397b-a17b',              // best text quality
-  profile_writer: 'qwen/qwen3.5-397b-a17b',              // creative writing
+  chat:           'meta/llama-3.3-70b-instruct',         // best general text quality
+  profile_writer: 'meta/llama-3.3-70b-instruct',         // creative writing
   profile_review: 'meta/llama-4-maverick-17b-128e-instruct', // vision + reasoning
   ai_photos:      'nvidia/nemotron-nano-12b-v2-vl',      // purpose-built photo analysis
 } as const;
 
 // ─── Fallback chain ───────────────────────────────────────────────────────────
 export const FALLBACK_MODELS: Record<string, string> = {
-  'qwen/qwen3.5-397b-a17b':                  'meta/llama-3.1-70b-instruct',
+  'meta/llama-3.3-70b-instruct':             'meta/llama-3.1-70b-instruct',
   'nvidia/nemotron-nano-12b-v2-vl':          'meta/llama-4-maverick-17b-128e-instruct',
   'meta/llama-4-maverick-17b-128e-instruct': 'nvidia/llama-3.3-nemotron-super-49b-v1',
   'nvidia/llama-3.3-nemotron-super-49b-v1':  'meta/llama-3.1-70b-instruct',

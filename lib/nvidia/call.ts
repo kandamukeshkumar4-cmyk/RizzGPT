@@ -13,12 +13,23 @@ import { nim, FALLBACK_MODELS, ROUTER_MODEL } from './client';
 
 type CreateParams = Parameters<typeof nim.chat.completions.create>[0];
 
-function is410(err: unknown): boolean {
-  return String(err).includes('410') || String(err).includes('Gone');
+// Per-request ceiling so a dead/slow model fails over fast instead of
+// hanging until the serverless function times out (504).
+const REQUEST_TIMEOUT_MS = 20_000;
+
+// A model that's gone (410), missing (404), timing out, or 5xx-ing is worth
+// retrying on the fallback model. Auth (401/403) and bad-request (400) are not.
+function shouldFallback(err: unknown): boolean {
+  const s = String(err);
+  return (
+    /\b(410|404|5\d\d)\b/.test(s) ||
+    /Gone|timed?\s*out|timeout|ECONNRESET|ETIMEDOUT|aborted/i.test(s) ||
+    (err instanceof Error && err.name === 'APIConnectionTimeoutError')
+  );
 }
 
 /**
- * Call NIM with automatic fallback if the primary model is gone (410).
+ * Call NIM with automatic fallback when the primary model is unavailable.
  * Returns { completion, modelUsed } so callers know which model actually ran.
  */
 export async function nimCall(
@@ -27,20 +38,22 @@ export async function nimCall(
   const primary = params.model as string;
 
   try {
-    const completion = await nim.chat.completions.create({
-      ...params, stream: false,
-    }) as OpenAI.Chat.ChatCompletion;
+    const completion = await nim.chat.completions.create(
+      { ...params, stream: false },
+      { timeout: REQUEST_TIMEOUT_MS },
+    ) as OpenAI.Chat.ChatCompletion;
     return { completion, modelUsed: primary };
   } catch (err) {
-    if (!is410(err)) throw err; // re-throw non-410 errors
+    if (!shouldFallback(err)) throw err;
 
     const fallback = FALLBACK_MODELS[primary];
     if (!fallback) throw err;
 
-    console.warn(`[NIM] ${primary} → 410, falling back to ${fallback}`);
-    const completion = await nim.chat.completions.create({
-      ...params, model: fallback, stream: false,
-    }) as OpenAI.Chat.ChatCompletion;
+    console.warn(`[NIM] ${primary} unavailable (${String(err).slice(0, 80)}), falling back to ${fallback}`);
+    const completion = await nim.chat.completions.create(
+      { ...params, model: fallback, stream: false },
+      { timeout: REQUEST_TIMEOUT_MS },
+    ) as OpenAI.Chat.ChatCompletion;
     return { completion, modelUsed: fallback };
   }
 }
